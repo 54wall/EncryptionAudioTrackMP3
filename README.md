@@ -2,8 +2,9 @@
 ####问题背景
 最近项目可能需要对声音进行加密，解密，进行识别认证，在网上有一篇文章介绍了如何使用AES算法在java中对音频进行加密<a href="http://blog.csdn.net/u012964281/article/details/41787857">Android 加密/解密音频文件(AES)</a>。
 其具体的做法就是将加密文件和解密文件全部保存到存储器上，在未来项目中需要频繁的读写硬盘可不是一个好的建议，所以寻找能够保存的是加密的音频，然后直接对加密音频进行解密，之后直接在内存中进行播放。
-于是又找到了一篇关于实时播放wav，但是我们需要的mp3，最好还是解决实时播放wav文章的最初原作者同样给出了实时解码mp3的解决方法-<a href="http://mindtherobot.com/blog/624/android-audio-play-an-mp3-file-on-an-audiotrack">Android Audio: Play an MP3 file on an AudioTrack</a>
-下面的代码就是混合了他们所有人的产物代码以上传至github，部分内容也是直接翻译过来
+于是又找到了一篇关于实时播放wav，但是我们需要的mp3，最好还是解决实时播放wav文章的最初原作者同样给出了实时解码mp3的解决方法-<a href="http://mindtherobot.com/blog/624/android-audio-play-an-mp3-file-on-an-audiotrack">Android Audio: Play an MP3 file on an AudioTrack</a>下面的代码就是混合了他们所有人的产物，部分内容也是直接翻译过来。
+####代码以上传
+github：<a href="https://github.com/54wall/EncryptionAudioTrackMP3">使用TrackAudio播放AES加密的mp3</a>
 ####这里的逻辑
 为什么加密和TrackAudio能够混在一起用，讲下这里的逻辑：因为播放mp3使用TrackAudio，它使用的是音频流，即输入的是byte[],而AES解密后输出也是byte[],所以AES解密后直接输出byte的，再传递给TrackAudio进行音频播放也就顺理成章了。
 而具体的流程就是：使用AES机密mp3文件，并将解密后的文件newByte_track（byte[]类型），直接交给ByteArrayInputStream变成InputStream in；
@@ -44,6 +45,16 @@ InputStream in = new ByteArrayInputStream(newByte_track);
                     }
                     byte[] Byte_JLayer=outStream.toByteArray();
 ```
+这里需要说明下：
+```
+ short[] buffer = sampleBuffer.getBuffer();
+                        for (short s : buffer) {
+                          outStream.write(s & 0xff);
+                          outStream.write((s >> 8 ) & 0xff);
+                          }     
+```
+上边的代码表示的是将short类型的值写入到“数据输出流”中，见<a href="http://www.cnblogs.com/skywang12345/p/io_15.html">[[DataOutputStream(数据输出流)的认知、源码和示例](http://www.cnblogs.com/skywang12345/p/io_15.html)](http://www.cnblogs.com/think-in-java/p/5527389.html)</a>。
+计算机内的存储都是利用二进制的补码进行存储的，byte类型的数字要&0xff再赋值给int类型，其本质原因就是想保持二进制补码的一致性，见<a href="http://www.cnblogs.com/think-in-java/p/5527389.html">[byte为什么要与上0xff？](http://www.cnblogs.com/think-in-java/p/5527389.html)</a>。
 这里参数修改如下时，播放的音乐的完整性和播放开始的速度都是不一样的。
 ```
     				//大约需要14s，但是歌曲可以完整保存下来
@@ -93,4 +104,5 @@ mDecoder = new Decoder();
 下边的这些参数实际也是跟随android设备进行设置的，可以通过调整细微的参数，看AudioTrack播放音乐时会有不同的表现。
 ####效果图
 将代码保重的54wall拷贝到手机的内部存储器或者SD卡上，54wall文件夹中有一个q.mp3,是导盲犬小Q的一个音乐，然后运行项目后就是下边的效果，此时的q.mp3是没有加密过的，直接点击play，就可以播放，点击encryp是进行加密保存到存储器上，再进行play是不能播放的，这时点击toJLayer则Activity进行跳转，使用Jlayer进行播放，注意，这时需要消耗一定的时间，进行解码，开始是没有声音的。
+
 ![encryption.jpg](http://upload-images.jianshu.io/upload_images/2467798-9cbf058f6082e06e.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
