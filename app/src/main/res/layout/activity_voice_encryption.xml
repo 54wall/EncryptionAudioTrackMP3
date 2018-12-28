@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btn_play"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="play" />
+
+    <Button
+        android:id="@+id/btn_encrypt"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="encrypt" />
+
+    <Button
+        android:id="@+id/btn_decrypt"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="decrypt" />
+
+    <Button
+        android:id="@+id/btn_jlayer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="toJLayer" />
+
+    <ImageView
+        android:id="@+id/iv_54wall"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/img_54wall" />
+
+</LinearLayout>
