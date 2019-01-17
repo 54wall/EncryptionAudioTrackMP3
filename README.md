@@ -7,13 +7,13 @@
 #### 逻辑
 为什么加密和TrackAudio能够混在一起用，讲下这里的逻辑：因为播放mp3使用TrackAudio，它使用的是音频流，即输入的是byte[],而AES解密后输出也是byte[],所以AES解密后直接输出byte的，再传递给TrackAudio进行音频播放也就顺理成章了。
 而具体的流程就是：使用AES机密mp3文件，并将解密后的文件newByte_track（byte[]类型），直接交给ByteArrayInputStream变成InputStream in；
-```
+```java
 InputStream in = new ByteArrayInputStream(newByte_track); 
 Bitstream bitstream = new Bitstream(in);
 ```
 
 变为Bitstream bitstream ，而Jlayer正好可以将bitstream 作为输入，然后输出SampleBuffer 
-```
+```java
 SampleBuffer sampleBuffer = (SampleBuffer) mDecoder.decodeFrame(header, bitstream);
 ```
 最后把SampleBuffer 转换为byte[],我们的TrackAudio是可以直接播放byte[]。
@@ -26,7 +26,7 @@ SampleBuffer sampleBuffer = (SampleBuffer) mDecoder.decodeFrame(header, bitstrea
 在使用Jlayer之前，首先把它导入进来到你的项目中来。
 下边是调用Jlayer代码
 
-```
+```java
 InputStream in = new ByteArrayInputStream(newByte_track); 
         Bitstream bitstream = new Bitstream(in);
                     final int READ_THRESHOLD = 2147483647;
@@ -45,7 +45,7 @@ InputStream in = new ByteArrayInputStream(newByte_track);
                     byte[] Byte_JLayer=outStream.toByteArray();
 ```
 这里需要说明下：
-```
+```java
  short[] buffer = sampleBuffer.getBuffer();
                         for (short s : buffer) {
                           outStream.write(s & 0xff);
@@ -55,7 +55,7 @@ InputStream in = new ByteArrayInputStream(newByte_track);
 上边的代码表示的是将short类型的值写入到“数据输出流”中，见<a href="http://www.cnblogs.com/skywang12345/p/io_15.html">[[DataOutputStream(数据输出流)的认知、源码和示例](http://www.cnblogs.com/skywang12345/p/io_15.html)](http://www.cnblogs.com/think-in-java/p/5527389.html)</a>。
 计算机内的存储都是利用二进制的补码进行存储的，byte类型的数字要&0xff再赋值给int类型，其本质原因就是想保持二进制补码的一致性，见<a href="http://www.cnblogs.com/think-in-java/p/5527389.html">[byte为什么要与上0xff？](http://www.cnblogs.com/think-in-java/p/5527389.html)</a>。
 这里参数修改如下时，播放的音乐的完整性和播放开始的速度都是不一样的。
-```
+```java
     				//大约需要14s，但是歌曲可以完整保存下来
 //                   final int READ_THRESHOLD = 2147483647;//我试着改动了，没有变化;
                     //需要3s，但是音乐没有播放完就结束了
@@ -66,7 +66,7 @@ InputStream in = new ByteArrayInputStream(newByte_track);
 其中
 
 
-```
+```java
 mDecoder = new Decoder();
 ```
 这里Decoder类的完整类名javazoom.jl.decoder.Decoder.Decoder()，当然代码时死的，不需要记忆，但是你要知道它的原理，然后实现它。
@@ -74,7 +74,7 @@ mDecoder = new Decoder();
 如果你需要在你的app中解码mp3，这篇文章可以帮助到你。
 在使用Jlayer成功获得到数据  byte[] Byte_JLayer，剩下的工作就交给AudioTrack了，当然在将byte[] Byte_JLayer存入AudioTrack，首先是配置AudioTrack：
 
-``` 
+```java 
         final int sampleRate = 44100;
         
         final int minBufferSize = AudioTrack.getMinBufferSize(sampleRate,
